@@ -1,13 +1,13 @@
-Chatbot FAQ Restaurant
+**Chatbot FAQ Restaurant**
 
-##Stack
+## Stack
 - n8n (orchestration)
 - Claude Haiku 4.5 (modèle IA)
 - Google Sheets (FAQ dynamique)
 - PostgreSQL / Supabase (mémoire persistante)
 - Telegram + Gmail (notifications) 
 
-##Fonctionnalité
+## Fonctionnalité
 
 - Prends les rendez-vous des clients automatiquement
 - Informe le client sur les spécificités du restaurant (mail,adresse,menu,numéro...) 
@@ -15,7 +15,7 @@ Chatbot FAQ Restaurant
 au client 
 - Il se met automatiquement à jour sur les infos du restaurant via le Google Sheets
 
-##Résultat concret
+## Résultat concret
 
   **Avant** : employé humain gérant les rendez-vous travaillant 35 h/semaine et payé 1600 euros
   
