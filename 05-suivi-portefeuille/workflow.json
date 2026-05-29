@@ -1,0 +1,350 @@
+{
+  "name": "Suivi portefeuille",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        -64
+      ],
+      "id": "6319cff7-4396-4522-a8ac-1d48b773aa5e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://query1.finance.yahoo.com/v8/finance/chart/AEME.PA",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        224,
+        -16
+      ],
+      "id": "add697ab-2059-4625-8703-b2ebf23356e5",
+      "name": "ETF emergents"
+    },
+    {
+      "parameters": {
+        "url": "https://query1.finance.yahoo.com/v8/finance/chart/MWRD.MI",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        224,
+        -400
+      ],
+      "id": "78390ee0-281d-4d97-93a7-3d4202d566ad",
+      "name": "ETF msci world"
+    },
+    {
+      "parameters": {
+        "url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=eur",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        448,
+        320
+      ],
+      "id": "5cf336ef-cc54-45ca-beb9-5badc23c680c",
+      "name": "Bitcoin+Eth"
+    },
+    {
+      "parameters": {
+        "url": "https://query1.finance.yahoo.com/v8/finance/chart/ETZ.PA",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        224,
+        176
+      ],
+      "id": "ef4f52bb-826a-4508-a18c-3af7c55c75bb",
+      "name": "ETF Europe 600"
+    },
+    {
+      "parameters": {
+        "url": "https://query1.finance.yahoo.com/v8/finance/chart/ESEH.PA",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        224,
+        -208
+      ],
+      "id": "2d4087a1-ba0d-4465-8fcd-c406c1be205c",
+      "name": "ETF S&P 500"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        448,
+        -144
+      ],
+      "id": "f6c0311f-59f3-47fe-b1a9-c40109ce30c2",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const tab=[]\nfor (const item of items) {\n  const prix=item.json.chart.result[0].meta.regularMarketPrice\n  tab.push(prix)\n}\n\nreturn ({json:{tab}});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        -112
+      ],
+      "id": "48c8beb6-105e-4298-a79b-caa22a9ce465",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const tab1=[$input.first().json.bitcoin.eur,$input.first().json.ethereum.eur]\nreturn ({json:{tab1}});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        320
+      ],
+      "id": "52e35422-44ba-49c8-997c-4ec92cf26dd5",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        896,
+        64
+      ],
+      "id": "8e84350a-86be-419d-93f8-a4b5053a0c59",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const cryptos = items[1].json.tab1\nconst etf = items[0].json.tab\nconst noms_etf=[\"ETF msci world\",\"ETF S&P 500\",\"ETF emergents\",\n\"ETF Europe 600\"]\nconst noms_cryptos=[\"bitcoin\",\"ethereum\"]\nconst message=etf.map((prix, index) => `${noms_etf[index]}: ${prix}€`).join(\"\\n\")+\"\\n\"+cryptos.map((prix1,index)=> `${noms_cryptos[index]}: ${prix1}€`).join(\"\\n\")\nlet jour=items[2].json['Day of week']\nswitch (jour) {\n  case \"Monday\":\n    jour = \"Lundi\"\n    break\n  case \"Tuesday\":\n    jour = \"Mardi\"\n    break\n  case \"Wednesday\":\n    jour = \"Mercredi\"\n    break\n  case \"Thursday\":\n    jour = \"Jeudi\"\n    break\n  case \"Friday\":\n    jour = \"Vendredi\"\n    break\n  case \"Saturday\":\n    jour = \"Samedi\"\n    break\n  case \"Sunday\":\n    jour = \"Dimanche\"\n    break\n}\nlet mois = items[2].json.Month\nswitch (mois) {\n  case \"January\": mois = \"Janvier\"; break\n  case \"February\": mois = \"Février\"; break\n  case \"March\": mois = \"Mars\"; break\n  case \"April\": mois = \"Avril\"; break\n  case \"May\": mois = \"Mai\"; break\n  case \"June\": mois = \"Juin\"; break\n  case \"July\": mois = \"Juillet\"; break\n  case \"August\": mois = \"Août\"; break\n  case \"September\": mois = \"Septembre\"; break\n  case \"October\": mois = \"Octobre\"; break\n  case \"November\": mois = \"Novembre\"; break\n  case \"December\": mois = \"Décembre\"; break\n}\nconst annee=items[2].json.Year\nlet heure=items[2].json.Hour\nlet minute=items[2].json.Minute\nconst jour_du_mois=items[2].json['Day of month']\nheure=heure.toString().padStart(2, '0')\nminute=minute.toString().padStart(2, '0')\nreturn ({json:{jour,message,mois,annee,heure,minute,jour_du_mois}})"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        64
+      ],
+      "id": "9273360b-6b5e-4694-9192-d27782c44d02",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "sendTo": "lilianperfetti@gmail.com",
+        "subject": "=Suivi quotidien du portefeuille du {{ $json.jour }} {{ $json.jour_du_mois }} {{ $json.mois }} {{ $json.annee }} à {{ $json.heure }}h{{ $json.minute }}",
+        "emailType": "text",
+        "message": "={{ $json.message }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1344,
+        64
+      ],
+      "id": "7d69932e-d668-47de-a276-f03386003b0a",
+      "name": "Send a message",
+      "webhookId": "bd55c185-5c7f-4e9c-8eeb-0a456ea2ef44",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "DEmYaJn2VI7htLjK",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "ETF Europe 600",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bitcoin+Eth",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "ETF S&P 500",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "ETF emergents",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "ETF msci world",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Bitcoin+Eth": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ETF Europe 600": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "ETF emergents": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "ETF S&P 500": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "ETF msci world": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f41dde72-262d-444b-ba26-859f3ee8de4b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1bc7563cbc54a8db245f2e90f65864281801ec7f9f6521dace0689d4e68030bc"
+  },
+  "id": "kHOfBl7Zl6Fddz68m6BOe",
+  "tags": []
+}

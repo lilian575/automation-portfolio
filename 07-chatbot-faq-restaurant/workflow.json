@@ -1,0 +1,266 @@
+{
+  "name": "My workflow 10",
+  "nodes": [
+    {
+      "parameters": {
+        "availableInChat": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8cce0591-7c6e-4b09-94c4-967d046ed42f",
+      "name": "When chat message received",
+      "webhookId": "8b1028ef-d6b5-4b90-9e28-0673fecd3ef1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=Tu es un assistant pour un restaurant. Réponds aux questions des clients en te basant uniquement sur les informations que tu rechercheras dans \"info\"\n\n\nQuand tu fais une réservation tu exécutes \"reservation_faite\"\nRéponds toujours dans la même langue que le client, quelle que soit la langue utilisée.\nSi tu ne trouves pas la réponse, dis poliment que tu ne sais pas et demande au client si il veut être mis en contact avec un expert\nSi il veut:\ntu lui demandes son adresse mail et tu exécute 'no_response' \n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        480,
+        0
+      ],
+      "id": "3f7b268b-96c5-4f20-a5a1-7cfb97dc92de",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-haiku-4-5-20251001",
+          "mode": "list",
+          "cachedResultName": "Claude Haiku 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        224
+      ],
+      "id": "40424fb2-ee0e-4c45-af24-f70b4a267971",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "huFvMBLRgQySHgR4",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Appelle cet outil lorsque l'utilisateur souhaite effectuer une réservation. Collecte d'abord le nom, la date, l'heure et le nombre de personnes avant d'appeler cet outil.",
+        "jsCode": "const nom = $input.first().json.nom\nconst date = $input.first().json.date\nconst heure = $input.first().json.heure\nconst personnes = $input.first().json.personnes\n\n\nreturn `Réservation enregistrée : ${nom}, le ${date} à ${heure} pour ${personnes} personne(s).`",
+        "specifyInputSchema": true,
+        "jsonSchemaExample": "{\n  \"nom\": \"Jean Dupont\",\n  \"date\": \"2026-06-15\",\n  \"heure\": \"19h30\",\n  \"personnes\": 2\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        224
+      ],
+      "id": "8c6eea64-7326-44cc-82e1-c52d0853d398",
+      "name": "faire_reservation"
+    },
+    {
+      "parameters": {
+        "chatId": "=5638695125",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', `Je suis le restaurateur et je voudrais que tu me rendes un compte rendu du rendez-vous que tu as pris je veux que le message soit de cette forme\nexemple:\nRéservation confirmé!\nNom:lilian\nDate=11/06/2026\nHeure:20:00\nNombre de personnes:5`, 'string') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        608,
+        224
+      ],
+      "id": "d1f9ecd0-d652-4284-9be3-8dad786a9c91",
+      "name": "reservation_faite",
+      "webhookId": "70ffe05b-6b65-41ab-8a27-90eab127e949",
+      "credentials": {
+        "telegramApi": {
+          "id": "QqyWPRtrtcoD2klm",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "lilianperfetti@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', `Sujet qui résume ce que le client veut`, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', `Envoie la question qu'à poser le client en donnant l'adresse mail du client`, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        736,
+        224
+      ],
+      "id": "91a4806c-0571-4c4f-a1d6-f29db6aac0c5",
+      "name": "no_response",
+      "webhookId": "4f40d1da-0f5a-4e0e-90e7-3e7b8f6c3355",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "DEmYaJn2VI7htLjK",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        352,
+        224
+      ],
+      "id": "b5cc01e4-ef40-4eeb-a211-d513f7a4e8ba",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "zx7pDqGVDcZMElNo",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1xhGIl7u7RcZ_8N6xPpshmO6SMfV7UhdM8OYDtoSiIok",
+          "mode": "list",
+          "cachedResultName": "resto",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xhGIl7u7RcZ_8N6xPpshmO6SMfV7UhdM8OYDtoSiIok/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Faq_restaurant",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xhGIl7u7RcZ_8N6xPpshmO6SMfV7UhdM8OYDtoSiIok/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        864,
+        224
+      ],
+      "id": "237fc976-3728-4b1d-aeea-3d2b3e229ef3",
+      "name": "Info",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pL5p2G3AwfBFt13C",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "faire_reservation": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "reservation_faite": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "no_response": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Info": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0f6ddba6-4e5d-4a8a-ad88-07df870918de",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1bc7563cbc54a8db245f2e90f65864281801ec7f9f6521dace0689d4e68030bc"
+  },
+  "id": "_ggDP41dYbB-bkrSYOkb9",
+  "tags": []
+}
