@@ -1,0 +1,229 @@
+{
+  "name": "04 - Content Marketing - Pipeline posts réseaux sociaux",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [1],
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-480, 300],
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Planification hebdomadaire"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "YOUR_NOTION_DATABASE_ID",
+          "mode": "id"
+        },
+        "returnAll": true,
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "key": "Statut|select",
+              "condition": "equals",
+              "selectValue": "À rédiger"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [-240, 300],
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Lire Idées de posts",
+      "credentials": {
+        "notionApi": {
+          "id": "notionApi",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tu es un expert en marketing digital spécialisé dans l'automatisation avec n8n.\n\nRédige un post LinkedIn engageant à partir de cette idée d'automatisation :\n\nTitre : {{ $json.properties.Titre.title[0].plain_text }}\nDescription : {{ $json.properties.Description.rich_text[0] ? $json.properties.Description.rich_text[0].plain_text : 'Pas de description fournie' }}\n\nContraintes :\n1) Le post doit faire entre 150 et 300 mots\n2) Commence par une accroche forte (question ou chiffre percutant)\n3) Explique le problème que l'automatisation résout\n4) Décris la solution n8n en termes simples\n5) Termine par un call-to-action (ex: \"Commente AUTOMATION pour recevoir le workflow\")\n6) Utilise des emojis avec parcimonie (2-3 maximum)\n7) Adapte le ton : professionnel mais accessible\n8) N'inclus pas de hashtags dans le corps du texte, liste-les séparément à la fin\n\nFormat de réponse :\n[POST]\n(texte du post)\n[HASHTAGS]\n(5-7 hashtags pertinents)",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Tu es un copywriter expert en automatisation et productivité. Tes posts LinkedIn génèrent systématiquement un fort engagement car tu parles des vrais problèmes des entrepreneurs et freelances."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [0, 300],
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "Générer le post"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [80, 520],
+      "id": "a1b2c3d4-0004-4000-8000-000000000004",
+      "name": "OpenAI GPT-4o-mini",
+      "credentials": {
+        "openAiApi": {
+          "id": "openAiApi",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "subject": "=Post à publier - {{ $('Lire Idées de posts').item.json.properties.Titre.title[0].plain_text }}",
+        "message": "=Bonjour,\n\nVoici le brouillon de post généré automatiquement pour l'idée : {{ $('Lire Idées de posts').item.json.properties.Titre.title[0].plain_text }}\n\n---\n\n{{ $json.text }}\n\n---\n\nCe brouillon a été généré le {{ $now.format('DD/MM/YYYY') }} à {{ $now.format('HH:mm') }}.\nRevisez et publiez quand vous êtes prêt(e) !\n\nCordialement,\nVotre assistant n8n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [240, 300],
+      "id": "a1b2c3d4-0005-4000-8000-000000000005",
+      "name": "Créer brouillon Gmail",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gmailOAuth2",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "update",
+        "pageId": {
+          "__rl": true,
+          "value": "={{ $('Lire Idées de posts').item.json.id }}",
+          "mode": "id"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Statut|select",
+              "selectValue": "Brouillon prêt"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [480, 300],
+      "id": "a1b2c3d4-0006-4000-8000-000000000006",
+      "name": "Mettre à jour statut Notion",
+      "credentials": {
+        "notionApi": {
+          "id": "notionApi",
+          "name": "Notion account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Planification hebdomadaire": {
+      "main": [
+        [
+          {
+            "node": "Lire Idées de posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire Idées de posts": {
+      "main": [
+        [
+          {
+            "node": "Générer le post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Générer le post": {
+      "main": [
+        [
+          {
+            "node": "Créer brouillon Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT-4o-mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Générer le post",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Créer brouillon Gmail": {
+      "main": [
+        [
+          {
+            "node": "Mettre à jour statut Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "versionId": "04000000-0000-4000-8000-000000000001",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": ""
+  },
+  "id": "workflow-04-content-marketing",
+  "tags": [
+    {
+      "createdAt": "2026-05-29T09:00:00.000Z",
+      "updatedAt": "2026-05-29T09:00:00.000Z",
+      "id": "tag-content",
+      "name": "content-marketing"
+    }
+  ]
+}
