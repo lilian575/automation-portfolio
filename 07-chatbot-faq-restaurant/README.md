@@ -17,5 +17,6 @@ au client
 
 ##Résultat concret
 
-**Avant** : employé humain gérant les rendez-vous travaillant 35 h/semaine et payé 1600 euros
-**Après** : Agent IA gérant les rendez-vous 24 h/24 7 j/7 à moindres frais
+  **Avant** : employé humain gérant les rendez-vous travaillant 35 h/semaine et payé 1600 euros
+  
+  **Après** : Agent IA gérant les rendez-vous 24 h/24 7 j/7 à moindres frais
