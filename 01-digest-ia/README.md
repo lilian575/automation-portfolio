@@ -13,6 +13,6 @@ Tous les lundi à 00h00 vous recevrez les actualités sur la tech résumeés env
  
 ## Résultat concret
 
-Avant : Recherche activement les informations sur la tech perdant ainsi du temps
+**Avant** : Recherche activement les informations sur la tech perdant ainsi du temps
 
-Après : Plus besoin de chercher les infos viennent à vous chaque semaine
+**Après** : Plus besoin de chercher les infos viennent à vous chaque semaine
